@@ -220,9 +220,16 @@ else
       case "$key" in (wrapperUrl) jarUrl="$value"; break ;;
       esac
     done < "$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
-    if [ "$MVNW_VERBOSE" = true ]; then
-      echo "Downloading from: $jarUrl"
+
+    if [[ "$jarUrl" =~ ^https://repo.maven.apache.org/maven2/.* ]]; then
+      if [ "$MVNW_VERBOSE" = true ]; then
+        echo "Downloading from: $jarUrl"
+      fi
+    else
+      echo "Invalid download URL: $jarUrl" >&2
+      exit 1
     fi
+
     wrapperJarPath="$BASE_DIR/.mvn/wrapper/maven-wrapper.jar"
     if $cygwin; then
       wrapperJarPath=`cygpath --path --windows "$wrapperJarPath"`
@@ -245,6 +252,31 @@ else
             curl -o "$wrapperJarPath" "$jarUrl" -f
         else
             curl --user $MVNW_USERNAME:$MVNW_PASSWORD -o "$wrapperJarPath" "$jarUrl" -f
+        fi
+
+    else
+        if [ "$MVNW_VERBOSE" = true ]; then
+          echo "Falling back to using Java to download"
+        fi
+        javaClass="$BASE_DIR/.mvn/wrapper/MavenWrapperDownloader.java"
+        # For Cygwin, switch paths to Windows format before running javac
+        if $cygwin; then
+          javaClass=`cygpath --path --windows "$javaClass"`
+        fi
+        if [ -e "$javaClass" ]; then
+            if [ ! -e "$BASE_DIR/.mvn/wrapper/MavenWrapperDownloader.class" ]; then
+                if [ "$MVNW_VERBOSE" = true ]; then
+                  echo " - Compiling MavenWrapperDownloader.java ..."
+                fi
+                # Compiling the Java class
+                ("$JAVA_HOME/bin/javac" "$javaClass")
+            fi
+            if [ -e "$BASE_DIR/.mvn/wrapper/MavenWrapperDownloader.class" ]; then
+                # Running the downloader
+                if [ "$MVNW_VERBOSE" = true ]; then
+                  echo " - Running MavenWrapperDownloader.java ..."
+                fi
+                ("$JAVA_HOME/bin/java" -cp .mvn/wrapper MavenWrapperDownloader "$MAVEN_PROJECTBASEDIR")
         fi
 
     else
